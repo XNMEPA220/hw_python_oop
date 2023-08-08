@@ -1,3 +1,7 @@
+import sys
+from _collections_abc import Sequence as seq
+
+
 class InfoMessage:
     """Информационное сообщение о тренировке."""
     def __init__(self,
@@ -37,31 +41,24 @@ class Training:
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
-        distance: float = self.action * self.LEN_STEP / self.M_IN_KM
-        return distance
+        return self.action * self.LEN_STEP / self.M_IN_KM
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
         distance: float = self.get_distance()
-        mean_speed: float = distance / self.duration
-        return mean_speed
+        return distance / self.duration
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass
+        raise NotImplementedError
 
     def show_training_info(self,) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
-        distance = self.get_distance()
-        speed = self.get_mean_speed()
-        calories = self.get_spent_calories()
-        type_info = type(self).__name__
-        message = InfoMessage(type_info,
-                              self.duration,
-                              distance,
-                              speed,
-                              calories)
-        return message
+        return InfoMessage(type(self).__name__,
+                           self.duration,
+                           self.get_distance(),
+                           self.get_mean_speed(),
+                           self.get_spent_calories())
 
 
 class Running(Training):
@@ -136,11 +133,17 @@ class Swimming(Training):
         return super().get_distance()
 
 
-def read_package(workout_type: str, data: list) -> Training:
+def read_package(workout_type: str, data: seq[list[int]]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    train_type_dict = {'SWM': Swimming, 'RUN': Running, 'WLK': SportsWalking}
-    used_train = train_type_dict[workout_type](*data)
-    return used_train
+    train_type_dict: dict[str, Training] = ({'SWM': Swimming,
+                                             'RUN': Running,
+                                             'WLK': SportsWalking})
+    try:
+        used_train = train_type_dict[workout_type](*data)
+        return used_train
+    except KeyError:
+        print('Передан неизвестный workout_type')
+        sys.exit()
 
 
 def main(training: Training) -> None:
@@ -154,6 +157,7 @@ if __name__ == '__main__':
         ('SWM', [720, 1, 80, 25, 40]),
         ('RUN', [15000, 1, 75]),
         ('WLK', [9000, 1, 75, 180]),
+        ('QWE', [9000, 1, 75, 180]),
     ]
 
     for workout_type, data in packages:
