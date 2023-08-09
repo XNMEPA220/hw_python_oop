@@ -47,7 +47,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        raise NotImplementedError
+        raise NotImplementedError("Не определен метод в дочернем классе")
 
     def show_training_info(self,) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -69,10 +69,9 @@ class Running(Training):
     def get_spent_calories(self) -> float:
         speed = self.get_mean_speed()
         duration_in_minutes = self.duration * self.HOURS_IN_MINUTES
-        calories = ((self.CALORIES_MEAN_SPEED_MULTIPLIER * speed
-                     + self.CALORIES_MEAN_SPEED_SHIFT) * self.weight
-                    / self.M_IN_KM * duration_in_minutes)
-        return calories
+        return ((self.CALORIES_MEAN_SPEED_MULTIPLIER * speed
+                 + self.CALORIES_MEAN_SPEED_SHIFT) * self.weight
+                / self.M_IN_KM * duration_in_minutes)
 
 
 class SportsWalking(Training):
@@ -94,10 +93,9 @@ class SportsWalking(Training):
         speed_in_minute = (self.get_mean_speed()
                            * self.KILOM_PER_HOUR_IN_METR_PER_SEC)
         height_in_metr = self.height / self.METR_IN_SANTIMETR
-        calories = ((self.WEIGHT_COEFF * self.weight
-                     + (speed_in_minute**2 / height_in_metr)
-                     * self.HEIGHT_COEFF * self.weight) * duration_in_minutes)
-        return calories
+        return ((self.WEIGHT_COEFF * self.weight
+                 + (speed_in_minute**2 / height_in_metr)
+                 * self.HEIGHT_COEFF * self.weight) * duration_in_minutes)
 
 
 class Swimming(Training):
@@ -116,15 +114,13 @@ class Swimming(Training):
         self.count_pool = count_pool
 
     def get_mean_speed(self) -> float:
-        speed = (self.length_pool * self.count_pool
-                 / self.M_IN_KM / self.duration)
-        return speed
+        return (self.length_pool * self.count_pool
+                / self.M_IN_KM / self.duration)
 
     def get_spent_calories(self) -> float:
         speed = self.get_mean_speed()
-        callories = ((speed + self.SPEED_COEFF) * self.SUM_SPEED_COEFF
-                     * self.weight * self.duration)
-        return callories
+        return ((speed + self.SPEED_COEFF) * self.SUM_SPEED_COEFF
+                * self.weight * self.duration)
 
     def get_distance(self) -> float:
         return super().get_distance()
@@ -135,10 +131,10 @@ def read_package(workout_type: str, data: seq[list[int]]) -> Training:
     train_type_dict: dict[str, Training] = ({'SWM': Swimming,
                                              'RUN': Running,
                                              'WLK': SportsWalking})
-    try:
+    if workout_type in train_type_dict:
         used_train = train_type_dict[workout_type](*data)
         return used_train
-    except KeyError:
+    else:
         print('Передан неизвестный workout_type')
         sys.exit()
 
